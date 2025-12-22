@@ -1,4 +1,6 @@
-import prisma from "@/lib/prisma";
+import connectDB from "@/lib/db";
+import Component from "@/models/Component";
+import User from "@/models/User";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
@@ -11,13 +13,28 @@ export default async function AdminDashboard() {
         redirect("/");
     }
 
-    const components = await prisma.component.findMany({
-        include: { user: true },
-        orderBy: { createdAt: "desc" },
+    await connectDB();
+
+    const rawComponents = await Component.find({}).sort({ createdAt: -1 }).lean();
+    const components = rawComponents.map(doc => {
+        const { _id, __v, ...rest } = doc;
+        return {
+            ...rest,
+            id: _id.toString(),
+            createdAt: doc.createdAt?.toISOString(),
+            updatedAt: doc.updatedAt?.toISOString()
+        };
     });
 
-    const users = await prisma.user.findMany({
-        orderBy: { createdAt: "desc" },
+    const rawUsers = await User.find({}).sort({ createdAt: -1 }).lean();
+    const users = rawUsers.map(doc => {
+        const { _id, __v, ...rest } = doc;
+        return {
+            ...rest,
+            id: _id.toString(),
+            createdAt: doc.createdAt?.toISOString(),
+            updatedAt: doc.updatedAt?.toISOString()
+        };
     });
 
     return (

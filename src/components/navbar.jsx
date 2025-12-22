@@ -9,16 +9,28 @@ import { Button } from "@/components/ui/button"
 import { Sparkles, Menu, X, Palette } from "lucide-react"
 import { useVibe, VIBES } from "@/components/vibe-provider"
 
+import { useSession, signOut } from "next-auth/react"
+
 export function Navbar() {
     const [isOpen, setIsOpen] = React.useState(false)
     const pathname = usePathname()
     const { vibe, setVibe } = useVibe()
+    const { data: session, status } = useSession()
 
     const links = [
         { href: "/components", label: "Components" },
         { href: "/community", label: "Community" },
-        { href: "/upload", label: "Upload" },
     ]
+
+    // Only add Upload link if logged in
+    if (session) {
+        links.push({ href: "/upload", label: "Upload" })
+    }
+
+    // Add Admin link if admin
+    if (session?.user?.role === "ADMIN") {
+        links.push({ href: "/admin/dashboard", label: "Admin" })
+    }
 
     const toggleVibe = () => {
         const vibes = Object.values(VIBES)
@@ -58,11 +70,29 @@ export function Navbar() {
                         <Palette className="h-5 w-5 text-indigo-400" />
                     </Button>
 
-                    <Link href="/login">
-                        <Button variant="glass" size="sm" className="ml-2">
-                            Get Started
-                        </Button>
-                    </Link>
+                    {status === "loading" ? (
+                        <div className="h-8 w-20 bg-white/5 animate-pulse rounded" />
+                    ) : session ? (
+                        <div className="flex items-center gap-4">
+                            <span className="text-sm text-white/60 hidden lg:inline-block">
+                                {session.user.name}
+                            </span>
+                            <Button
+                                variant="glass"
+                                size="sm"
+                                className="ml-2 hover:bg-red-500/20 hover:text-red-400 hover:border-red-500/50"
+                                onClick={() => signOut({ callbackUrl: "/" })}
+                            >
+                                Logout
+                            </Button>
+                        </div>
+                    ) : (
+                        <Link href="/login">
+                            <Button variant="glass" size="sm" className="ml-2">
+                                Get Started
+                            </Button>
+                        </Link>
+                    )}
                 </div>
 
                 {/* Mobile Toggle */}
@@ -92,11 +122,26 @@ export function Navbar() {
                                 {link.label}
                             </Link>
                         ))}
-                        <Link href="/login" onClick={() => setIsOpen(false)}>
-                            <Button variant="glass" size="sm" className="w-full">
-                                Get Started
+
+                        {session ? (
+                            <Button
+                                variant="glass"
+                                size="sm"
+                                className="w-full text-red-400"
+                                onClick={() => {
+                                    setIsOpen(false);
+                                    signOut({ callbackUrl: "/" });
+                                }}
+                            >
+                                Logout
                             </Button>
-                        </Link>
+                        ) : (
+                            <Link href="/login" onClick={() => setIsOpen(false)}>
+                                <Button variant="glass" size="sm" className="w-full">
+                                    Get Started
+                                </Button>
+                            </Link>
+                        )}
                     </div>
                 </motion.div>
             )}

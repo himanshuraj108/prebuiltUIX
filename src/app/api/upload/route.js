@@ -1,6 +1,7 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/route";
-import prisma from "@/lib/prisma";
+import connectDB from "@/lib/db";
+import Component from "@/models/Component";
 import { NextResponse } from "next/server";
 
 export async function POST(req) {
@@ -11,6 +12,8 @@ export async function POST(req) {
     }
 
     try {
+        await connectDB();
+
         const body = await req.json();
         const { title, description, code, framework, catalog, tags, previewConfig, installationSteps, isOfficial } = body;
 
@@ -18,45 +21,25 @@ export async function POST(req) {
             return new NextResponse("Missing fields", { status: 400 });
         }
 
-        let userId = session.user.id;
-
-        // Ensure user exists in DB (for Admin Provider users)
-        const user = await prisma.user.findUnique({
-            where: { email: session.user.email }
-        });
-
-        if (!user) {
-            const newUser = await prisma.user.create({
-                data: {
-                    name: session.user.name,
-                    email: session.user.email,
-                    role: session.user.role || "USER",
-                }
-            });
-            userId = newUser.id;
-        } else {
-            userId = user.id;
-        }
-
-        const component = await prisma.component.create({
-            data: {
-                title,
-                description,
-                code,
-                framework: framework || "react",
-                category: catalog || "Uncategorized",
-                tags: Array.isArray(tags) ? tags.join(",") : tags,
-                previewConfig,
-                installationSteps,
-                catalogId: undefined, // Using category string for now
-                userId,
-                isOfficial: isOfficial !== undefined ? isOfficial : session.user.role === "ADMIN",
-            },
+        // Mongoose Create
+        const component = await Component.create({
+            title,
+            description,
+            code,
+            framework: framework || "react",
+            category: catalog || "Uncategorized",
+            tags: Array.isArray(tags) ? tags.join(",") : tags,
+            previewConfig,
+            installationSteps,
+            // Decoupled from User model to allow standalone DB inserts
+            author: session.user.name || "Anonymous",
+            userId: session.user.id || "manual-upload",
+            isOfficial: isOfficial !== undefined ? isOfficial : session.user.role === "ADMIN",
         });
 
         return NextResponse.json(component);
     } catch (error) {
         console.error("Upload error:", error);
-        return new NextResponse("Internal Error", { status: 500 });
+        return new NextResponse(`Internal Error: ${error.message}`, { status: 500 });
     }
 }

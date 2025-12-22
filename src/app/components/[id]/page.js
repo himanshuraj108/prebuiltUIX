@@ -1,32 +1,36 @@
 import { ComponentView } from "@/components/component-view";
-import prisma from "@/lib/prisma";
+import connectDB from "@/lib/db";
+import Component from "@/models/Component";
 import { ALL_CATALOGS } from "@/data/catalogs";
 
 export default async function CatalogPage({ params }) {
-    const slug = params.id;
+    const { id } = await params;
+    const slug = id;
 
-    // Find the catalog name from our static dictionary to ensure we have a nice display name
-    // (and to map slug back to proper Case if needed, though we save exactly what matches)
+    // Find the catalog name from our static dictionary
     const catalogDef = ALL_CATALOGS.find(c => c.slug === slug);
-    const categoryName = catalogDef ? catalogDef.name : slug; // Fallback to slug if not found
+    const categoryName = catalogDef ? catalogDef.name : slug;
+
+    await connectDB();
 
     // Fetch ONLY official components for this category
-    const components = await prisma.component.findMany({
-        where: {
-            /* 
-               We match EITHER:
-               1. isOfficial is true (Admin)
-               2. category matches the slug OR the nice name 
-                  (Since we save "Buttons", but slug is "buttons", we might need to check both or Regex)
-               For now, we know Admin Upload saves "Buttons" (Proper Case).
-            */
-            isOfficial: true,
-            OR: [
-                { category: { equals: categoryName, mode: 'insensitive' } },
-                { category: { equals: slug, mode: 'insensitive' } }
-            ]
-        },
-        orderBy: { createdAt: "desc" }
+    // Mongoose OR syntax: $or: [...]
+    const rawComponents = await Component.find({
+        isOfficial: true,
+        $or: [
+            { category: { $regex: new RegExp(`^${categoryName}$`, 'i') } },
+            { category: { $regex: new RegExp(`^${slug}$`, 'i') } }
+        ]
+    }).sort({ createdAt: -1 }).lean();
+
+    const components = rawComponents.map(doc => {
+        const { _id, __v, ...rest } = doc; // Remove non-serializable fields
+        return {
+            ...rest,
+            id: _id.toString(),
+            createdAt: doc.createdAt?.toISOString(),
+            updatedAt: doc.updatedAt?.toISOString()
+        };
     });
 
     if (components.length === 0) {

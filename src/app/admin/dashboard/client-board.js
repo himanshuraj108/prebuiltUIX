@@ -57,7 +57,7 @@ export default function AdminClientBoard({ initialComponents, initialUsers }) {
                                 <Card key={comp.id} className="flex justify-between items-center p-4">
                                     <div>
                                         <h4 className="font-bold">{comp.title}</h4>
-                                        <p className="text-xs text-muted-foreground">by {comp.user?.name} | {comp.framework} | {comp.isOfficial ? "OFFICIAL" : "Community"}</p>
+                                        <p className="text-xs text-muted-foreground">by {comp.author || "Anonymous"} | {comp.framework} | {comp.isOfficial ? "OFFICIAL" : "Community"}</p>
                                     </div>
                                     <Button variant="destructive" size="sm" onClick={() => handleDelete(comp.id, "component")} disabled={loading === comp.id}>
                                         <Trash2 className="h-4 w-4" />

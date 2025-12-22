@@ -5,12 +5,13 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { Check, Copy } from "lucide-react";
+import { Check, Copy, Monitor, Tablet, Smartphone } from "lucide-react";
 
 export function ComponentView({ data }) {
     const [copied, setCopied] = useState(false);
     const [previewBg, setPreviewBg] = useState("bg-[#0F0F0F]");
     const [activeTab, setActiveTab] = useState("preview");
+    const [previewWidth, setPreviewWidth] = useState("100%");
 
     // Simple JSX to HTML converter
     const getHtmlCode = (jsx) => {
@@ -50,7 +51,7 @@ export function ComponentView({ data }) {
             <div className="lg:col-span-2">
                 <Card className="min-h-[500px] border-white/10 overflow-hidden flex flex-col bg-[#050505] shadow-2xl">
                     {/* Toolbar */}
-                    <div className="border-b border-white/10 p-4 flex justify-between items-center bg-black/60 backdrop-blur-sm">
+                    <div className="border-b border-white/10 p-4 flex justify-between items-center bg-black/60 backdrop-blur-sm flex-wrap gap-4">
                         <div className="flex bg-black/50 p-1 rounded-lg border border-white/5 gap-1">
                             <button
                                 onClick={() => setActiveTab("preview")}
@@ -73,6 +74,31 @@ export function ComponentView({ data }) {
                         </div>
 
                         <div className="flex items-center gap-3">
+                            {/* Device Toggles */}
+                            <div className="flex gap-1 bg-black/50 p-1 rounded-lg border border-white/5 mr-2">
+                                <button
+                                    onClick={() => setPreviewWidth("100%")}
+                                    className={`p-1.5 rounded transition-all ${previewWidth === "100%" ? "bg-white/10 text-white" : "text-gray-500 hover:text-gray-300"}`}
+                                    title="Desktop (100%)"
+                                >
+                                    <Monitor size={16} />
+                                </button>
+                                <button
+                                    onClick={() => setPreviewWidth("768px")}
+                                    className={`p-1.5 rounded transition-all ${previewWidth === "768px" ? "bg-white/10 text-white" : "text-gray-500 hover:text-gray-300"}`}
+                                    title="Tablet (768px)"
+                                >
+                                    <Tablet size={16} />
+                                </button>
+                                <button
+                                    onClick={() => setPreviewWidth("375px")}
+                                    className={`p-1.5 rounded transition-all ${previewWidth === "375px" ? "bg-white/10 text-white" : "text-gray-500 hover:text-gray-300"}`}
+                                    title="Mobile (375px)"
+                                >
+                                    <Smartphone size={16} />
+                                </button>
+                            </div>
+
                             <span className="text-xs text-muted-foreground uppercase tracking-widest font-medium hidden sm:inline-block">Background</span>
                             <div className="flex gap-2 bg-black/50 p-1.5 rounded-lg border border-white/5">
                                 <button
@@ -99,8 +125,16 @@ export function ComponentView({ data }) {
                     <div className={`flex-1 overflow-auto relative transition-colors duration-300 ${activeTab === "preview" ? previewBg : "bg-[#0d0d0d]"}`}>
                         {activeTab === "preview" ? (
                             <div className="min-h-full flex items-center justify-center p-8 lg:p-12">
-                                <div className="w-full max-w-full animate-in fade-in zoom-in-95 duration-500">
-                                    <div dangerouslySetInnerHTML={{ __html: data.code }} />
+                                <div
+                                    className="w-full transition-all duration-500 ease-in-out border border-transparent"
+                                    style={{ width: previewWidth, maxWidth: "100%" }}
+                                >
+                                    {previewWidth !== "100%" && (
+                                        <div className="text-xs text-muted-foreground text-center mb-2 pb-2 border-b border-dashed border-white/10 w-full">
+                                            {previewWidth === "768px" ? "Tablet View" : "Mobile View"}
+                                        </div>
+                                    )}
+                                    <div dangerouslySetInnerHTML={{ __html: data.code }} className="w-full" />
                                 </div>
                             </div>
                         ) : (

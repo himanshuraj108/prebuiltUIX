@@ -1,6 +1,8 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/route";
-import prisma from "@/lib/prisma";
+import connectDB from "@/lib/db";
+import Component from "@/models/Component";
+import User from "@/models/User";
 import { NextResponse } from "next/server";
 
 export async function DELETE(req) {
@@ -15,10 +17,12 @@ export async function DELETE(req) {
     const type = searchParams.get("type"); // 'component' or 'user'
 
     try {
+        await connectDB();
+
         if (type === "component") {
-            await prisma.component.delete({ where: { id } });
+            await Component.findByIdAndDelete(id);
         } else if (type === "user") {
-            await prisma.user.delete({ where: { id } });
+            await User.findByIdAndDelete(id);
         } else {
             return new NextResponse("Invalid type", { status: 400 });
         }

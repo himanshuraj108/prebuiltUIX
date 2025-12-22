@@ -1,20 +1,33 @@
-import prisma from "@/lib/prisma";
+// Community Page
+// import prisma from "@/lib/prisma"; // REMOVED
 import Link from "next/link";
 import { Card, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Eye, Clock } from "lucide-react";
 import { formatDistanceToNow } from "date-fns"; // Standard util, but might need install. Will use fallback.
+import connectDB from "@/lib/db";
+import Component from "@/models/Component";
 
 async function getCommunityComponents() {
     try {
-        const components = await prisma.component.findMany({
-            where: { isOfficial: false },
-            orderBy: { createdAt: "desc" },
-            include: { user: true },
-            take: 20
+        await connectDB();
+        // lean() converts Mongoose documents to plain JS objects, needed for Next.js serialization
+        const components = await Component.find({ isOfficial: false })
+            .sort({ createdAt: -1 })
+            .limit(20)
+            .lean();
+
+        // Map _id to id for consistency if needed, though simple display might work with _id
+        return components.map(doc => {
+            const { _id, __v, ...rest } = doc;
+            return {
+                ...rest,
+                id: _id.toString(),
+                createdAt: doc.createdAt?.toISOString(),
+                updatedAt: doc.updatedAt?.toISOString()
+            };
         });
-        return components;
     } catch (error) {
         console.error("Failed to fetch community components:", error);
         return [];
@@ -80,9 +93,9 @@ export default async function CommunityPage() {
                                 <CardFooter className="p-6 pt-0 flex justify-between text-xs text-muted-foreground mt-auto border-t border-white/5">
                                     <div className="flex items-center gap-2 pt-4">
                                         <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-[10px] text-white font-bold shadow-lg">
-                                            {comp.user?.name?.[0].toUpperCase() || "U"}
+                                            {comp.author?.[0]?.toUpperCase() || "A"}
                                         </div>
-                                        <span className="text-white/80">{comp.user?.name || "Anonymous"}</span>
+                                        <span className="text-white/80">{comp.author || "Anonymous"}</span>
                                     </div>
                                     <div className="flex items-center gap-1.5 pt-4 text-white/40">
                                         <Clock className="w-3.5 h-3.5" />
