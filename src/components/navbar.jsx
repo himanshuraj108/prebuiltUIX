@@ -16,6 +16,23 @@ export function Navbar() {
     const pathname = usePathname()
     const { vibe, setVibe } = useVibe()
     const { data: session, status } = useSession()
+    const [avatarUrl, setAvatarUrl] = React.useState("")
+
+    React.useEffect(() => {
+        if (session?.user?.image) {
+            setAvatarUrl(session.user.image);
+        }
+
+        // Fetch fresh profile to get the latest avatar (bypassing stale cookie)
+        if (session?.user) {
+            fetch("/api/user/profile")
+                .then(res => res.json())
+                .then(data => {
+                    if (data.image) setAvatarUrl(data.image);
+                })
+                .catch(err => console.error(err));
+        }
+    }, [session]);
 
     const links = [
         { href: "/components", label: "Components" },
@@ -74,9 +91,20 @@ export function Navbar() {
                         <div className="h-8 w-20 bg-white/5 animate-pulse rounded" />
                     ) : session ? (
                         <div className="flex items-center gap-4">
-                            <span className="text-sm text-white/60 hidden lg:inline-block">
-                                {session.user.name}
-                            </span>
+                            <Link href="/settings" className="flex items-center gap-2 hover:opacity-80 transition-opacity" title="Account Settings">
+                                <div className="h-8 w-8 rounded-full overflow-hidden border border-white/20">
+                                    {avatarUrl ? (
+                                        <img src={avatarUrl} alt={session.user.name} className="h-full w-full object-cover" />
+                                    ) : (
+                                        <div className="h-full w-full bg-indigo-500/20 flex items-center justify-center text-indigo-400 font-bold">
+                                            {session.user.name?.[0]?.toUpperCase()}
+                                        </div>
+                                    )}
+                                </div>
+                                <span className="text-sm text-white/60 hidden lg:inline-block">
+                                    {session.user.name}
+                                </span>
+                            </Link>
                             <Button
                                 variant="glass"
                                 size="sm"
@@ -105,46 +133,57 @@ export function Navbar() {
             </div>
 
             {/* Mobile Menu */}
-            {isOpen && (
-                <motion.div
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="md:hidden border-b border-white/10 bg-black/90 backdrop-blur-xl"
-                >
-                    <div className="flex flex-col p-4 space-y-4">
-                        {links.map((link) => (
-                            <Link
-                                key={link.href}
-                                href={link.href}
-                                onClick={() => setIsOpen(false)}
-                                className="text-sm font-medium text-white/80 hover:text-white"
-                            >
-                                {link.label}
-                            </Link>
-                        ))}
+            {
+                isOpen && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="md:hidden border-b border-white/10 bg-black/90 backdrop-blur-xl"
+                    >
+                        <div className="flex flex-col p-4 space-y-4">
+                            {links.map((link) => (
+                                <Link
+                                    key={link.href}
+                                    href={link.href}
+                                    onClick={() => setIsOpen(false)}
+                                    className="text-sm font-medium text-white/80 hover:text-white"
+                                >
+                                    {link.label}
+                                </Link>
+                            ))}
 
-                        {session ? (
-                            <Button
-                                variant="glass"
-                                size="sm"
-                                className="w-full text-red-400"
-                                onClick={() => {
-                                    setIsOpen(false);
-                                    signOut({ callbackUrl: "/" });
-                                }}
-                            >
-                                Logout
-                            </Button>
-                        ) : (
-                            <Link href="/login" onClick={() => setIsOpen(false)}>
-                                <Button variant="glass" size="sm" className="w-full">
-                                    Get Started
-                                </Button>
-                            </Link>
-                        )}
-                    </div>
-                </motion.div>
-            )}
-        </nav>
+                            {session ? (
+                                <>
+                                    <Link
+                                        href="/settings"
+                                        onClick={() => setIsOpen(false)}
+                                        className="text-sm font-medium text-white/80 hover:text-white flex items-center gap-2"
+                                    >
+                                        <span>Settings</span>
+                                    </Link>
+                                    <Button
+                                        variant="glass"
+                                        size="sm"
+                                        className="w-full text-red-400"
+                                        onClick={() => {
+                                            setIsOpen(false);
+                                            signOut({ callbackUrl: "/" });
+                                        }}
+                                    >
+                                        Logout
+                                    </Button>
+                                </>
+                            ) : (
+                                <Link href="/login" onClick={() => setIsOpen(false)}>
+                                    <Button variant="glass" size="sm" className="w-full">
+                                        Get Started
+                                    </Button>
+                                </Link>
+                            )}
+                        </div>
+                    </motion.div>
+                )
+            }
+        </nav >
     )
 }

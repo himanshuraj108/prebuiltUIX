@@ -11,6 +11,24 @@ const ComponentSchema = new mongoose.Schema({
     installationSteps: String,
     isOfficial: { type: Boolean, default: false },
     views: { type: Number, default: 0 },
+    likes: [{ type: String }], // Array of User IDs
+    comments: [{
+        userId: String,
+        userName: String,
+        userImage: String,
+        text: String,
+        createdAt: { type: Date, default: Date.now },
+        likes: [{ type: String }],
+        replies: [{
+            userId: String,
+            userName: String,
+            userImage: String,
+            text: String,
+            createdAt: { type: Date, default: Date.now },
+            likes: [{ type: String }]
+        }]
+    }],
+    shares: { type: Number, default: 0 },
     author: { type: String, default: "Anonymous" },
     userId: String, // Just a reference ID, usually email or sub
 }, { timestamps: true });

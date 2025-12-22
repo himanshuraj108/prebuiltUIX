@@ -13,27 +13,49 @@ export default function LoginPage() {
     const router = useRouter();
     const [isLogin, setIsLogin] = useState(true);
     const [loading, setLoading] = useState(false);
-    const [form, setForm] = useState({ username: "", password: "" });
+    const [form, setForm] = useState({ name: "", email: "", password: "" });
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
 
         try {
-            const res = await signIn("credentials", {
-                redirect: false,
-                username: form.username,
-                password: form.password,
-            });
+            if (isLogin) {
+                const res = await signIn("credentials", {
+                    redirect: false,
+                    email: form.email,
+                    password: form.password,
+                });
 
-            if (res?.error) {
-                alert("Invalid configuration or credentials");
+                if (res?.error) {
+                    alert("Invalid credentials");
+                } else {
+                    router.push("/admin/dashboard"); // Or home
+                    router.refresh();
+                }
             } else {
-                router.push("/admin/dashboard"); // Admin goes to dashboard
-                router.refresh();
+                // Sign Up
+                const res = await fetch("/api/register", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        name: form.name || form.email.split("@")[0],
+                        email: form.email,
+                        password: form.password
+                    })
+                });
+
+                if (res.ok) {
+                    alert("Account created! Please log in.");
+                    setIsLogin(true);
+                } else {
+                    const msg = await res.text();
+                    alert("Signup failed: " + msg);
+                }
             }
         } catch (error) {
             console.error(error);
+            alert("An error occurred");
         } finally {
             setLoading(false);
         }
@@ -80,13 +102,25 @@ export default function LoginPage() {
                             <div className="space-y-4">
                                 <form onSubmit={handleSubmit} className="space-y-4">
                                     <div className="space-y-4">
+                                        {!isLogin && (
+                                            <div className="relative group/input animate-in fade-in slide-in-from-top-2 duration-300">
+                                                <Input
+                                                    className="pl-4 bg-white/5 border-white/10 focus:border-indigo-500/50 focus:ring-indigo-500/20 h-12"
+                                                    placeholder="Full Name (Optional)"
+                                                    value={form.name}
+                                                    onChange={e => setForm({ ...form, name: e.target.value })}
+                                                />
+                                            </div>
+                                        )}
                                         <div className="relative group/input">
                                             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within/input:text-indigo-400 transition-colors" />
                                             <Input
+                                                type="email"
                                                 className="pl-10 bg-white/5 border-white/10 focus:border-indigo-500/50 focus:ring-indigo-500/20 transition-all h-12"
-                                                placeholder={isLogin ? "Username or Email" : "Email Address"}
-                                                value={form.username}
-                                                onChange={e => setForm({ ...form, username: e.target.value })}
+                                                placeholder="Email Address"
+                                                value={form.email}
+                                                onChange={e => setForm({ ...form, email: e.target.value })}
+                                                required
                                             />
                                         </div>
                                         <div className="relative group/input">
@@ -97,6 +131,7 @@ export default function LoginPage() {
                                                 placeholder="Password"
                                                 value={form.password}
                                                 onChange={e => setForm({ ...form, password: e.target.value })}
+                                                required
                                             />
                                         </div>
                                     </div>

@@ -5,25 +5,54 @@ import { MongoDBAdapter } from "@auth/mongodb-adapter";
 import clientPromise from "@/lib/mongodb";
 import connectDB from "@/lib/db";
 import User from "@/models/User";
+import bcrypt from "bcryptjs";
 
 export const authOptions = {
     adapter: MongoDBAdapter(clientPromise),
     providers: [
         CredentialsProvider({
-            name: "Admin Login",
+            name: "Credentials",
             credentials: {
-                username: { label: "Username", type: "text", placeholder: "admin" },
+                email: { label: "Email", type: "text", placeholder: "user@example.com" },
                 password: { label: "Password", type: "password" }
             },
             async authorize(credentials) {
-                // Hardcoded generic admin for now
+                // 1. Check Admin Hardcoded (Superuser)
                 if (
-                    credentials?.username === process.env.ADMIN_USERNAME &&
-                    credentials?.password === process.env.ADMIN_PASSWORD
+                    credentials?.email === process.env.ADMIN_USERNAME ||
+                    credentials?.username === process.env.ADMIN_USERNAME
                 ) {
-                    return { id: "admin", name: "Administrator", email: "admin@prebuiltuix.com", role: "ADMIN" };
+                    if (credentials?.password === process.env.ADMIN_PASSWORD) {
+                        return { id: "admin", name: "Administrator", email: "admin@prebuiltuix.com", role: "ADMIN" };
+                    }
                 }
-                return null;
+
+                // 2. Check Database User
+                try {
+                    await connectDB();
+                    const user = await User.findOne({ email: credentials?.email });
+
+                    if (!user || !user.password) {
+                        return null;
+                    }
+
+                    const isValid = await bcrypt.compare(credentials.password, user.password);
+
+                    if (!isValid) {
+                        return null;
+                    }
+
+                    return {
+                        id: user._id.toString(),
+                        name: user.name,
+                        email: user.email,
+                        role: user.role,
+                        image: user.image
+                    };
+                } catch (error) {
+                    console.error("Auth Error:", error);
+                    return null;
+                }
             }
         }),
         GithubProvider({
@@ -32,25 +61,30 @@ export const authOptions = {
         }),
     ],
     callbacks: {
-        async session({ session, token, user }) {
-            if (token?.role) {
-                session.user.role = token.role;
-            }
-            // For database sessions (if not using JWT strategy, though we are)
-            if (user?.role) {
-                session.user.role = user.role;
+        async session({ session, token }) {
+            if (session?.user) {
+                if (token.id) session.user.id = token.id;
+                if (token.role) session.user.role = token.role;
+                if (token.picture) session.user.image = token.picture; // Ensure image sync
+                if (token.name) session.user.name = token.name;
             }
             return session;
         },
         async jwt({ token, user, trigger, session }) {
             if (user) {
+                token.id = user.id;
                 token.role = user.role;
             }
-            // If user updates session, we can update token here
+
+            // Handle session update (trigger is "update")
+            if (trigger === "update" && session) {
+                if (session.name) token.name = session.name;
+                if (session.image) token.picture = session.image;
+            }
+
             return token;
         },
         async signIn({ user, account, profile }) {
-            // Ensure connection for any side effects if needed
             await connectDB();
             return true;
         }

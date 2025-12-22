@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Check, Copy, Monitor, Tablet, Smartphone } from "lucide-react";
 
-export function ComponentView({ data }) {
+export function ComponentView({ data, isFeedView = false }) {
     const [copied, setCopied] = useState(false);
     const [previewBg, setPreviewBg] = useState("bg-[#0F0F0F]");
     const [activeTab, setActiveTab] = useState("preview");
@@ -36,19 +36,21 @@ export function ComponentView({ data }) {
     };
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-20">
-            <div className="lg:col-span-3 mb-4">
-                <h2 className="text-2xl font-bold mb-2">{data.title}</h2>
-                <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    <Badge variant="secondary" className="bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20">{data.framework || "React + Tailwind"}</Badge>
-                    <span className="flex items-center gap-1">
-                        By <span className="text-foreground font-medium">{data.author}</span>
-                    </span>
-                    {data.description && <span className="border-l border-white/10 pl-4">{data.description}</span>}
+        <div className={`grid grid-cols-1 lg:grid-cols-3 gap-8 ${isFeedView ? "mb-0" : "mb-20"}`}>
+            {!isFeedView && (
+                <div className="lg:col-span-3 mb-4">
+                    <h2 className="text-2xl font-bold mb-2">{data.title}</h2>
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        <Badge variant="secondary" className="bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20">{data.framework || "React + Tailwind"}</Badge>
+                        <span className="flex items-center gap-1">
+                            By <span className="text-foreground font-medium">{data.author}</span>
+                        </span>
+                        {data.description && <span className="border-l border-white/10 pl-4">{data.description}</span>}
+                    </div>
                 </div>
-            </div>
+            )}
 
-            <div className="lg:col-span-2">
+            <div className={`transition-all duration-500 ease-in-out ${previewWidth === "100%" ? "lg:col-span-3" : "lg:col-span-2"}`}>
                 <Card className="min-h-[500px] border-white/10 overflow-hidden flex flex-col bg-[#050505] shadow-2xl">
                     {/* Toolbar */}
                     <div className="border-b border-white/10 p-4 flex justify-between items-center bg-black/60 backdrop-blur-sm flex-wrap gap-4">
@@ -99,7 +101,36 @@ export function ComponentView({ data }) {
                                 </button>
                             </div>
 
-                            <span className="text-xs text-muted-foreground uppercase tracking-widest font-medium hidden sm:inline-block">Background</span>
+                            {/* Framework Select */}
+                            <div className="flex items-center gap-2">
+                                <select
+                                    className="h-8 bg-black/50 border border-white/10 rounded-md text-xs px-2 text-gray-400 focus:outline-none focus:border-indigo-500"
+                                    defaultValue="react"
+                                    onChange={(e) => {
+                                        if (e.target.value === 'html') setActiveTab('html');
+                                        else setActiveTab('code');
+                                    }}
+                                >
+                                    <option value="react">React</option>
+                                    <option value="vue">Vue</option>
+                                    <option value="svelte">Svelte</option>
+                                    <option value="html">HTML</option>
+                                </select>
+
+                                <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="h-8 px-2 bg-black/50 border-white/10 text-gray-400 hover:text-white"
+                                    onClick={() => window.open('https://stackblitz.com', '_blank')}
+                                    title="Open in Code Editor"
+                                >
+                                    <span className="sr-only">Open Editor</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h6v6" /><path d="M10 14 21 3" /><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /></svg>
+                                </Button>
+                            </div>
+
+                            <span className="w-px h-4 bg-white/10 mx-1"></span>
+
                             <div className="flex gap-2 bg-black/50 p-1.5 rounded-lg border border-white/5">
                                 <button
                                     title="Dark Mode"
@@ -151,8 +182,8 @@ export function ComponentView({ data }) {
                 </Card>
             </div>
 
-            <div className="space-y-6">
-                <Card className="p-6 space-y-4 bg-transparent border-white/5">
+            <div className={`space-y-6 transition-all duration-500 ease-in-out ${previewWidth === "100%" ? "lg:col-span-3 lg:grid lg:grid-cols-3 lg:gap-8 lg:space-y-0" : "lg:col-span-1"}`}>
+                <Card className={`p-6 space-y-4 bg-transparent border-white/5 ${previewWidth === "100%" ? "lg:col-start-3" : ""}`}>
                     <h3 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground">
                         {activeTab === 'html' ? 'HTML Integration' : 'Installation'}
                     </h3>
