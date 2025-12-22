@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Trash2, User, FileCode } from "lucide-react";
+import { Trash2, User, FileCode, Plus } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"; // Assuming Tabs wrapper works or we simulate
 
 function SimpleTabs({ children }) {
@@ -14,6 +14,11 @@ function SimpleTabs({ children }) {
             <div className="flex space-x-4 mb-6 border-b border-white/10 pb-2">
                 <button onClick={() => setActive("components")} className={`${active === "components" ? "text-white border-b-2 border-red-500" : "text-muted-foreground"}`}>Components</button>
                 <button onClick={() => setActive("users")} className={`${active === "users" ? "text-white border-b-2 border-red-500" : "text-muted-foreground"}`}>Users</button>
+            </div>
+            <div className="absolute top-0 right-0">
+                <Button onClick={() => window.location.href = '/admin/upload'} className="bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-500/20">
+                    <Plus className="h-4 w-4 mr-2" /> Upload New
+                </Button>
             </div>
             {children(active)}
         </div>

@@ -42,7 +42,10 @@ model Component {
   description String?
   code        String   // JSON or Stringified content
   framework   String   @default("react") // react, vue, html, etc.
+  category    String   @default("Uncategorized") // "Buttons", "Navbars" etc.
   tags        String?  // Comma separated tags
+  previewConfig String? // JSON string for custom props/config
+  installationSteps String? // Markdown content
   isOfficial  Boolean  @default(false)
   views       Int      @default(0)
   

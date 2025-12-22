@@ -12,26 +12,20 @@ export async function POST(req) {
 
     try {
         const body = await req.json();
-        const { title, description, code, framework } = body;
+        const { title, description, code, framework, catalog, tags, previewConfig, installationSteps, isOfficial } = body;
 
         if (!title || !code) {
             return new NextResponse("Missing fields", { status: 400 });
         }
 
-        // Basic User finding or creating (mock behavior since we use Github/Google providers that might not have seeded the User in Prisma yet if using basic NextAuth flow without full adapter syncing sometimes)
-        // Actually, PrismaAdapter handles user creation on login.
-        // But for the Admin credential provider, we need to ensure the user exists.
-
         let userId = session.user.id;
 
-        // For Admin Credential provider, valid ID might not be a real db ID if not handled by adapter.
-        // We'll search for user by email.
+        // Ensure user exists in DB (for Admin Provider users)
         const user = await prisma.user.findUnique({
             where: { email: session.user.email }
         });
 
         if (!user) {
-            // Create user on the fly if it doesn't exist (e.g. Admin first time)
             const newUser = await prisma.user.create({
                 data: {
                     name: session.user.name,
@@ -50,8 +44,13 @@ export async function POST(req) {
                 description,
                 code,
                 framework: framework || "react",
+                category: catalog || "Uncategorized",
+                tags: Array.isArray(tags) ? tags.join(",") : tags,
+                previewConfig,
+                installationSteps,
+                catalogId: undefined, // Using category string for now
                 userId,
-                isOfficial: session.user.role === "ADMIN", // Auto-official if admin
+                isOfficial: isOfficial !== undefined ? isOfficial : session.user.role === "ADMIN",
             },
         });
 
