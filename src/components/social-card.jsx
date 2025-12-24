@@ -64,9 +64,14 @@ export function SocialCard({ component, currentUser }) {
                     <div>
                         <div className="flex items-center gap-2">
                             <h3 className="font-semibold text-sm hover:underline cursor-pointer">{component.author}</h3>
-                            <Badge variant="outline" className="text-[10px] h-4 px-1 text-muted-foreground border-white/10">
+                            <Badge variant="outline" className="text-[10px] h-4 px-1 text-muted-foreground border-white/10 ml-2">
                                 {component.framework}
                             </Badge>
+                            {component.type === "template" && (
+                                <Badge variant="default" className="text-[10px] h-4 px-1 bg-pink-500/10 text-pink-400 hover:bg-pink-500/20 border-pink-500/20 ml-1">
+                                    Template
+                                </Badge>
+                            )}
                         </div>
                         <p className="text-xs text-muted-foreground">
                             {component.createdAt ? formatDistanceToNow(new Date(component.createdAt), { addSuffix: true }) : "Just now"}

@@ -37,6 +37,7 @@ export function Navbar() {
     const links = [
         { href: "/components", label: "Components" },
         { href: "/community", label: "Community" },
+        { href: "/templates", label: "Templates" },
     ]
 
     // Only add Upload link if logged in

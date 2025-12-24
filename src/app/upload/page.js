@@ -90,38 +90,78 @@ export default function UploadPage() {
                             />
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium text-white/80">Framework</label>
-                                <select
-                                    className="flex h-10 w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500/20 focus-visible:border-pink-500/50 hover:bg-white/10 transition-colors"
-                                    value={form.framework}
-                                    onChange={(e) => setForm({ ...form, framework: e.target.value })}
+                        {/* Type Selection - Premium Cards */}
+                        <div className="space-y-3">
+                            <label className="text-sm font-medium text-white/80">What are you creating?</label>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div
+                                    onClick={() => setForm({ ...form, type: "component" })}
+                                    className={`relative p-4 rounded-xl border transition-all cursor-pointer flex flex-col items-center text-center gap-2 group ${form.type === "component" || !form.type
+                                        ? "bg-indigo-500/10 border-indigo-500/50 shadow-[0_0_20px_-5px_#6366f1]"
+                                        : "bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20"
+                                        }`}
                                 >
-                                    <option value="react">React</option>
-                                    <option value="vue">Vue</option>
-                                    <option value="html">HTML/CSS</option>
-                                    <option value="svelte">Svelte</option>
-                                </select>
-                            </div>
+                                    <div className={`p-2 rounded-full ${form.type === "component" || !form.type ? "bg-indigo-500/20 text-indigo-400" : "bg-white/5 text-muted-foreground"}`}>
+                                        <div className="w-5 h-5 rounded-md border-2 border-current" />
+                                    </div>
+                                    <div>
+                                        <h3 className={`font-semibold text-sm ${form.type === "component" || !form.type ? "text-indigo-400" : "text-white/70"}`}>UI Component</h3>
+                                        <p className="text-[10px] text-muted-foreground mt-0.5 max-w-[120px]">Single element like a button, card, or input.</p>
+                                    </div>
+                                </div>
 
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium text-white/80">Catalog Group</label>
-                                <select
-                                    className="flex h-10 w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500/20 focus-visible:border-pink-500/50 hover:bg-white/10 transition-colors"
-                                    value={form.catalog}
-                                    onChange={(e) => setForm({ ...form, catalog: e.target.value })}
+                                <div
+                                    onClick={() => setForm({ ...form, type: "template" })}
+                                    className={`relative p-4 rounded-xl border transition-all cursor-pointer flex flex-col items-center text-center gap-2 group ${form.type === "template"
+                                        ? "bg-pink-500/10 border-pink-500/50 shadow-[0_0_20px_-5px_#ec4899]"
+                                        : "bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20"
+                                        }`}
                                 >
-                                    <option value="">Select Category</option>
-                                    {CATALOG_GROUPS.map((group) => (
-                                        <optgroup key={group.group} label={group.group} className="bg-gray-900 text-white">
-                                            {group.items.map((item) => (
-                                                <option key={item} value={item} className="bg-gray-900">{item}</option>
-                                            ))}
-                                        </optgroup>
-                                    ))}
-                                </select>
+                                    <div className={`p-2 rounded-full ${form.type === "template" ? "bg-pink-500/20 text-pink-400" : "bg-white/5 text-muted-foreground"}`}>
+                                        <div className="w-5 h-5 grid grid-cols-2 gap-0.5">
+                                            <div className="bg-current rounded-[1px] opacity-40 col-span-2 h-1.5" />
+                                            <div className="bg-current rounded-[1px] opacity-40 h-2.5" />
+                                            <div className="bg-current rounded-[1px] opacity-40 h-2.5" />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h3 className={`font-semibold text-sm ${form.type === "template" ? "text-pink-400" : "text-white/70"}`}>Full Template</h3>
+                                        <p className="text-[10px] text-muted-foreground mt-0.5 max-w-[120px]">Complete page layout or dashboard view.</p>
+                                    </div>
+                                </div>
                             </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-white/80">Framework</label>
+                            <select
+                                className="flex h-10 w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500/20 focus-visible:border-pink-500/50 hover:bg-white/10 transition-colors"
+                                value={form.framework}
+                                onChange={(e) => setForm({ ...form, framework: e.target.value })}
+                            >
+                                <option value="react">React</option>
+                                <option value="vue">Vue</option>
+                                <option value="html">HTML/CSS</option>
+                                <option value="svelte">Svelte</option>
+                            </select>
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-white/80">Catalog Group</label>
+                            <select
+                                className="flex h-10 w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pink-500/20 focus-visible:border-pink-500/50 hover:bg-white/10 transition-colors"
+                                value={form.catalog}
+                                onChange={(e) => setForm({ ...form, catalog: e.target.value })}
+                            >
+                                <option value="">Select Category</option>
+                                {CATALOG_GROUPS.map((group) => (
+                                    <optgroup key={group.group} label={group.group} className="bg-gray-900 text-white">
+                                        {group.items.map((item) => (
+                                            <option key={item} value={item} className="bg-gray-900">{item}</option>
+                                        ))}
+                                    </optgroup>
+                                ))}
+                            </select>
                         </div>
 
                         <div className="space-y-2">
@@ -179,7 +219,7 @@ export default function UploadPage() {
                         </p>
                     </div>
                 </div>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 }

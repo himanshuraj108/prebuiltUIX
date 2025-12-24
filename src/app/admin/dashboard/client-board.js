@@ -56,7 +56,10 @@ export default function AdminClientBoard({ initialComponents, initialUsers }) {
                             {initialComponents.map((comp) => (
                                 <Card key={comp.id} className="flex justify-between items-center p-4">
                                     <div>
-                                        <h4 className="font-bold">{comp.title}</h4>
+                                        <h4 className="font-bold flex items-center gap-2">
+                                            {comp.title}
+                                            {comp.type === 'template' && <span className="text-[10px] bg-pink-500/20 text-pink-400 px-1 rounded uppercase">Template</span>}
+                                        </h4>
                                         <p className="text-xs text-muted-foreground">by {comp.author || "Anonymous"} | {comp.framework} | {comp.isOfficial ? "OFFICIAL" : "Community"}</p>
                                     </div>
                                     <Button variant="destructive" size="sm" onClick={() => handleDelete(comp.id, "component")} disabled={loading === comp.id}>

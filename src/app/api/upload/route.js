@@ -15,10 +15,10 @@ export async function POST(req) {
         await connectDB();
 
         const body = await req.json();
-        const { title, description, code, framework, catalog, tags, previewConfig, installationSteps, isOfficial } = body;
+        const { title, description, code, framework, catalog, tags, previewConfig, installationSteps, isOfficial, type = "component" } = body;
 
         if (!title || !code) {
-            return new NextResponse("Missing fields", { status: 400 });
+            return new NextResponse("Missing required fields", { status: 400 });
         }
 
         // Mongoose Create
@@ -27,6 +27,7 @@ export async function POST(req) {
             description,
             code,
             framework: framework || "react",
+            type, // Added type here
             category: catalog || "Uncategorized",
             tags: Array.isArray(tags) ? tags.join(",") : tags,
             previewConfig,

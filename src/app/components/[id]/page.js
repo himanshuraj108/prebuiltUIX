@@ -39,7 +39,7 @@ export default async function CatalogPage({ params }) {
                 <h1 className="text-2xl font-bold mb-4">Coming Soon</h1>
                 <p className="text-muted-foreground">We haven't uploaded any official {categoryName} components yet.</p>
                 <div className="mt-8 p-4 bg-white/5 inline-block rounded-lg border border-white/10">
-                    <p className="text-xs text-muted-foreground">Admin? Upload one at <span className="text-mono text-white">/admin/upload</span></p>
+                    <p className="text-xs text-muted-foreground">Check back later for updates!</p>
                 </div>
             </div>
         );

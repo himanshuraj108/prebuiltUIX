@@ -5,6 +5,7 @@ const ComponentSchema = new mongoose.Schema({
     description: String,
     code: String,
     framework: { type: String, default: "react" },
+    type: { type: String, default: "component", enum: ["component", "template"] },
     category: { type: String, default: "Uncategorized" },
     tags: String,
     previewConfig: String,

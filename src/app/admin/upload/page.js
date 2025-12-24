@@ -117,6 +117,17 @@ export default function AdminUploadPage() {
 
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
+                                    <label className="text-sm font-medium">Type</label>
+                                    <select
+                                        className="w-full bg-black/50 border border-white/10 rounded-md p-2 text-sm"
+                                        value={form.type || "component"}
+                                        onChange={e => setForm({ ...form, type: e.target.value })}
+                                    >
+                                        <option value="component">Component</option>
+                                        <option value="template">Template</option>
+                                    </select>
+                                </div>
+                                <div className="space-y-2">
                                     <label className="text-sm font-medium">Framework</label>
                                     <select
                                         className="w-full bg-black/50 border border-white/10 rounded-md p-2 text-sm"
@@ -129,23 +140,24 @@ export default function AdminUploadPage() {
                                         <option value="svelte">Svelte</option>
                                     </select>
                                 </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium">Catalog</label>
-                                    <select
-                                        className="w-full bg-black/50 border border-white/10 rounded-md p-2 text-sm"
-                                        value={form.catalog}
-                                        onChange={e => setForm({ ...form, catalog: e.target.value })}
-                                    >
-                                        <option value="">Select...</option>
-                                        {CATALOG_GROUPS.map(g => (
-                                            <optgroup key={g.group} label={g.group}>
-                                                {g.items.map(item => (
-                                                    <option key={item} value={item}>{item}</option>
-                                                ))}
-                                            </optgroup>
-                                        ))}
-                                    </select>
-                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Catalog</label>
+                                <select
+                                    className="w-full bg-black/50 border border-white/10 rounded-md p-2 text-sm"
+                                    value={form.catalog}
+                                    onChange={e => setForm({ ...form, catalog: e.target.value })}
+                                >
+                                    <option value="">Select...</option>
+                                    {CATALOG_GROUPS.map(g => (
+                                        <optgroup key={g.group} label={g.group}>
+                                            {g.items.map(item => (
+                                                <option key={item} value={item}>{item}</option>
+                                            ))}
+                                        </optgroup>
+                                    ))}
+                                </select>
                             </div>
 
                             <div className="flex items-center justify-between p-4 bg-white/5 rounded-lg border border-white/10">
